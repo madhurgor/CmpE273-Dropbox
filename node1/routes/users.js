@@ -54,7 +54,7 @@ router.post('/signup',urlencodedParser,function (req, res) {
            //console.log("Data: " + results[0].count);
            //res.status(201).res.json({count: results[0].count});
            //res.status(201).json({message: "Data found"});
-          const insertDataSQL = "insert into users values('"+req.body.firstname+"','"+req.body.lastname+"','"+req.body.username+"','"+req.body.password+"')";
+          const insertDataSQL = "insert into users(firstname,lastname,username,password) values('"+req.body.firstname+"','"+req.body.lastname+"','"+req.body.username+"','"+req.body.password+"')";
 
           mysql.insertData((err, results) => {
              if(err){
@@ -64,6 +64,8 @@ router.post('/signup',urlencodedParser,function (req, res) {
           {
             console.log("No. of results after insertion:" + results.affectedRows);
             mkdirSync('../'+req.body.username);
+            mkdirSync('../'+req.body.username+'/normal');
+            mkdirSync('../'+req.body.username+'/star');
             res.status(201).json(results);
              }
           },insertDataSQL);
