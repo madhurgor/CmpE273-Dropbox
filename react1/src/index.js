@@ -2,9 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {BrowserRouter,Route} from 'react-router-dom';
 import Login from './components/Login';
-import {Login1} from './components/Login1';
-import {SignUp} from './components/SignUp';
-import {About} from './components/About';
+import HomePage from './components/HomePage';
+import SignUp from './components/SignUp';
+import About from './components/About';
+import AboutChange from './components/AboutChange';
+import Files1 from './components/Files1';
+import {Provider} from "react-redux";
+import store from "./actions/store";
 
 class App extends React.Component {
     render() {
@@ -13,9 +17,11 @@ class App extends React.Component {
                 <BrowserRouter>
                   <div>
                     <Route exact path="/" component={Login}/>
-                    <Route exact path="/login1" component={Login1}/>
+                    <Route exact path="/homepage" component={HomePage}/>
                     <Route exact path="/signup" component={SignUp}/>
                     <Route exact path="/about" component={About}/>
+                    <Route exact path="/change_info" component={AboutChange}/>
+                    <Route exact path="/files" component={Files1}/>
                   </div>
                 </BrowserRouter>
             </div>
@@ -23,4 +29,4 @@ class App extends React.Component {
     }
 }
 
-ReactDOM.render(<App/>, document.getElementById('app'));
+ReactDOM.render(<Provider store={store}><App/></Provider>, document.getElementById('app'));

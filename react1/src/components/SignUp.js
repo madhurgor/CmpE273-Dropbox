@@ -6,7 +6,7 @@ import {
   withRouter
 } from 'react-router-dom';
 import './Login.css';
-import { Redirect } from 'react-router'
+import { Redirect } from 'react-router';
 import * as API from '../api/API';
 
 export class SignUp extends Component {

@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom';
 import './Login.css';
 import * as API from '../api/API';
+import {connect} from 'react-redux';
 
 class Login extends Component {
     state = {
@@ -19,12 +20,7 @@ class Login extends Component {
 
     login() {
       console.log('login done..');
-      this.props.history.push("/login1");
-    }
-
-    login1() {
-      console.log('login not done..');
-      this.props.history.push("/login2");
+      this.props.history.push("/homepage");
     }
 
     handleSubmit = (userdata) => {
@@ -36,37 +32,42 @@ class Login extends Component {
         });
         document.getElementById('error1').style.display="block";
       } else {
+        var status;
         API.doLogin(userdata)
-            .then((status) => {
-                if (status === 201) {
-                    this.setState({
-                        isLoggedIn: true,
-                        message: "Welcome to my App..!!"
-                    });
-                    console.log(status);
-                    this.login();
-                } else if (status === 401) {
-                    this.setState({
-                        isLoggedIn: false,
-                        message: "Wrong username or password. Try again..!!"
-                    });
-                    document.getElementById('error1').style.display="block";
-                    //this.login1();
-                }
-                    else {
-                        this.setState({
-                            isLoggedIn: false,
-                            message: "Wrong username or password. Try again..!!"
-                    });
-                    document.getElementById('error1').style.display="block";
-                    //this.login1();
-                }
+            .then((res) => {
+              status = res.status;
+              return res.json();
+            }).then((json) => {
+              if (status === 201) {
+                  this.setState({
+                      isLoggedIn: true
+                  });
+                  console.log(status);
+                  const token = json.token;
+                  localStorage.setItem('jwtToken',token);
+                  //this.props.storeToken(localStorage.getItem('jwtToken'));
+                  this.login();
+              } else if (status === 401) {
+                  this.setState({
+                      isLoggedIn: false,
+                      message: "Wrong username or password. Try again..!!"
+                  });
+                  document.getElementById('error1').style.display="block";
+                  //this.login1();
+              } else {
+                      this.setState({
+                          isLoggedIn: false,
+                          message: "Something went Wrong..!!"
+                  });
+                  document.getElementById('error1').style.display="block";
+                  //this.login1();
+              }
             });
         }
       };
 
     render() {
-      //console.log(this.state.userdata);
+      console.log(this.props.select1);
         return (
           <div>
             <div className="container">
@@ -101,8 +102,9 @@ class Login extends Component {
                                 placeholder="Enter Username"
                                 value={this.state.username}
                                 onChange={(event) => {
+                                    this.props.userChange(event.target.value)
                                     this.setState({
-                                        username: event.target.value
+                                      username: event.target.value
                                     });
                                 }}
                             />
@@ -116,7 +118,7 @@ class Login extends Component {
                               value={this.state.password}
                               onChange={(event) => {
                                   this.setState({
-                                          password: event.target.value
+                                      password: event.target.value
                                   });
                               }}
                           />
@@ -148,4 +150,21 @@ class Login extends Component {
     }
 }
 
-export default withRouter(Login);
+const mapStateToProps = (state) => {
+  return{
+    select1: state.reducerUsers
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return{
+    userChange: (username) => {
+        dispatch({
+        type: "CHANGEUSER",
+        payload : {username:username}
+      });
+    },
+  };
+};
+
+export default withRouter(connect(mapStateToProps,mapDispatchToProps)(Login));

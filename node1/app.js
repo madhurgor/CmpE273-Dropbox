@@ -67,6 +67,6 @@ app.use(function (err, req, res, next) {
     res.json('error');
 });
 
-app.listen(3002,function(){
-  console.log('listening to port 3002....');
+app.listen(3001,function(){
+  console.log('listening to port 3001....');
 });
