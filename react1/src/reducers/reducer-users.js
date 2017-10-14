@@ -5,29 +5,43 @@ const reducerUsers = (state = {
   username: '',
   password:'',
   token:'',
+  file:[],
+  fileR:[],
+  data:[],
 }, action) => {
   switch(action.type){
-    case "CHANGELOG":
-        state={
-          ...state,
-          isLoggedIn : true,
-          firstname : action.payload.firstname,
-          lastname : action.payload.lastname
-        };
-        break;
     case "CHANGEUSER":
         state={
           ...state,
           username: action.payload.username
         };
-        console.log(state.username)
-        break;
+    break;
     case "SETTOKEN":
         state={
           ...state,
           token: action.payload.token
         };
-        break;
+    break;
+    case "CHANGEFILE":
+        state={
+          ...state,
+          file: action.payload.file
+        };
+    break;
+    case "CHANGEFILER":
+        state={
+          ...state,
+          fileR: action.payload.fileR
+        };
+    break;
+    case "SETINFO":
+        state={
+          ...state,
+          data: action.payload.data
+        };
+    break;
+    default:
+    break;
   }
   return state;
 };

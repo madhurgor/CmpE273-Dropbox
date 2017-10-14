@@ -1,18 +1,13 @@
 import React, {Component} from 'react';
 import {
-  BrowserRouter as Router,
-  Route,
   Link,
-  Redirect,
   withRouter
 } from 'react-router-dom';
 import * as API from '../api/API';
-import PropTypes from 'prop-types'
-import axios from 'axios';
-import Blob from 'blob';
-import FormData from 'form-data';
 import './HomePage.css';
 import {connect} from "react-redux";
+
+var data;
 
 class AboutChange extends Component {
 
@@ -38,37 +33,44 @@ class AboutChange extends Component {
     else
     {
       var status;
-      console.log(this.props.select.username);
-      API.about(this.props.select.username)
-          .then((res) => {
-            status = res.status;
-            return res.json();
-          }).then((json) => {
-            if (status === 201) {
-                console.log(status);
-                this.setState({
-                  firstname: json.firstname,
-                  lastname:json.lastname,
-                  work:json.work,
-                  education:json.education,
-                  hobbies:json.hobbies,
-                  phone_no:json.phone_no
-                })
-                //this.props.storeToken(localStorage.getItem('jwtToken'));
-                //this.login();
-            } else {
-                this.setState({
-                    message: "Something went Wrong..!!"
-                });
-            }
+      if(this.props.select.username!=="")
+      {
+        API.about(this.props.select.username)
+            .then((res) => {
+              status = res.status;
+              return res.json();
+            }).then((json) => {
+              if (status === 201) {
+                  this.setState({
+                    firstname: json.firstname,
+                    lastname:json.lastname,
+                    work:json.work,
+                    education:json.education,
+                    hobbies:json.hobbies,
+                    phone_no:json.phone_no
+                  })
+                  //this.props.storeToken(localStorage.getItem('jwtToken'));
+                  //this.login();
+                  data=[json.firstname,
+                        json.lastname,
+                        json.work,
+                        json.education,
+                        json.hobbies,
+                        json.phone_no];
+              this.props.setInfo(data);
+              } else {
+                  this.setState({
+                      message: "Something went Wrong..!!"
+                  });
+              }
           });
+      }
     }
   }
 
   updateInfo = () => {
     var status
     //console.log("here "+document.getElementById('fn').value);
-    console.log("here "+this.props.select.username);
     API.aboutChange({username:this.props.select.username,firstname:document.getElementById('fn').value,lastname:document.getElementById('ln').value,phone_no:document.getElementById('phone_no').value,education:document.getElementById('education').value,hobbies:document.getElementById('hobbies').value,work:document.getElementById('work').value})
     .then((res) => {
       status = res.status;
@@ -84,12 +86,10 @@ class AboutChange extends Component {
 
   onSignOut = () => {
    localStorage.removeItem('jwtToken');
-   this.props.storeRestore;
    window.location.replace('/');
   }
 
   render(){
-    console.log("in render"+this.props.select.username);
     return(
       <div>
         <div className="container-fluid">
@@ -141,17 +141,17 @@ class AboutChange extends Component {
               <pre>
               Email Address            : {this.props.select.username}
               <br/>
-              First Name:              : <input type='text' id='fn' placeholder={this.state.firstname}/>
+              First Name:              : <input type='text' id='fn' placeholder={this.props.select.data[0]}/>
               <br/>
-              Last Name:               : <input type='text' id='ln' placeholder={this.state.lastname}/>
+              Last Name:               : <input type='text' id='ln' placeholder={this.props.select.data[1]}/>
               <br/>
-              Work Information:        : <input type='text' id='work' placeholder={this.state.work}/>
+              Work Information:        : <input type='text' id='work' placeholder={this.props.select.data[2]}/>
               <br/>
-              Education:               : <input type='text' id='education' placeholder={this.state.education}/>
+              Education:               : <input type='text' id='education' placeholder={this.props.select.data[3]}/>
               <br/>
-              Phone Number:            : <input type='text' id='phone_no' placeholder={this.state.phone_no}/>
+              Phone Number:            : <input type='text' id='phone_no' placeholder={this.props.select.data[5]}/>
               <br/>
-              Hobbies:                 : <input type='text' id='hobbies' placeholder={this.state.hobbies}/>
+              Hobbies:                 : <input type='text' id='hobbies' placeholder={this.props.select.data[4]}/>
               </pre>
               <div className='row'>
                 <button className='update-info' onClick={this.updateInfo}>Update Information</button>
@@ -181,15 +181,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return{
-    storeRestore: () => {
+    setInfo: (data) => {
           dispatch({
-        type: "RESTORE"
-      });
-    },
-
-    getUserData: (data) => {
-          dispatch({
-        type: "CHANGEDATA",
+        type: "SETINFO",
         payload :{data:data}
       });
     },

@@ -1,15 +1,10 @@
 import React, {Component} from 'react';
 import {
-  BrowserRouter as Router,
-  Route,
   Link,
-  Redirect,
   withRouter
 } from 'react-router-dom';
 import * as API from '../api/API';
-import PropTypes from 'prop-types'
 import axios from 'axios';
-import Blob from 'blob';
 import FormData from 'form-data';
 import './HomePage.css';
 import Files from 'react-files';
@@ -21,7 +16,7 @@ class Files1 extends Component {
     super(props)
     this.state = {
       files: [],
-      files1:[],
+      //files1:[],
       message:''
     }
   }
@@ -35,28 +30,32 @@ class Files1 extends Component {
     else
     {
       var status;
-      console.log("username"+this.props.select.username);
-      API.files(this.props.select.username)
-          .then((res) => {
-            status = res.status;
-            return res.json();
-          }).then((json) => {
-            if (status === 201) {
-                this.setState({
-                files1:json.files
-                });
-            } else {
-                this.setState({
-                message: "Something went Wrong..!!"
-                });
+      if(this.props.select.username!=="")
+      {
+        API.files(this.props.select.username)
+            .then((res) => {
+              status = res.status;
+              return res.json();
+            }).then((json) => {
+              if (status === 201) {
+                  //this.setState({
+                  //  files1:json.files
+                  //});
+                  this.props.fileChange(json.files);
+              } else {
+                  this.setState({
+                    message: "Something went Wrong..!!"
+              });
             }
-          });
+        });
+      }
     }
   }
 
   onDownload = (item) => {
       axios.get(`http://localhost:3001/users/download`,{params:{file:item,username:this.props.select.username}})
          .then((res) => {
+           //console.log(res);
            console.log('downloaded..');
            FileDownload(res.data,item);
          }).catch((err) => {
@@ -69,8 +68,9 @@ class Files1 extends Component {
          .then((res) => {
            console.log('deleted..');
            window.alert(`${item} Deleted Successfully..!!`)
-           this.props.history.push('/homepage');
-           this.props.history.push('/files');
+           this.props.fileChange(this.props.select.file.filter((item1)=>{return item1!==item}));
+           //this.props.history.push('/homepage');
+           //this.props.history.push('/files');
          }).catch((err) => {
            window.alert(`${item} cannot be deleted!! Please try again later..`)
          })
@@ -81,6 +81,7 @@ class Files1 extends Component {
          .then((res) => {
            console.log('starred..');
            window.alert(`${item} Starred Successfully..!!`)
+           this.props.history.push('/homepage');
          }).catch((err) => {
            window.alert(`${item} cannot be starred!! Please try again later..`)
          })
@@ -95,8 +96,6 @@ class Files1 extends Component {
     this.setState({
       files
     }, () => {
-      console.log('on file change-->')
-      console.log(this.state.files);
     })
   }
 
@@ -106,37 +105,32 @@ class Files1 extends Component {
 
   filesUpload = () => {
     var formData = new FormData()
-    console.log('on file upload-->');
-    console.log(this.state.files);
     Object.keys(this.state.files).forEach((key) => {
       const file = this.state.files[key]
-      console.log('before form data --> file');
-      console.log(file);
       formData.append(key, file, file.name || 'file')
       //formData.append(key, new Blob([file], { type: file.type }), file.name || 'file')
-      console.log('after form data');
-      console.log(formData);
     })
     axios.post(`http://localhost:3001/users/files`, formData, {params:{'username':`${this.props.select.username}`}})
     .then(response => {
       window.alert(`${this.state.files.length} files uploaded succesfully!`);
+      Object.keys(this.state.files).forEach((key) => {
+        const file = this.state.files[key]
+        var ft1=this.props.select.file;
+        ft1.push(file.name);
+        this.props.fileChange(ft1)
+      })
       this.refs.files.removeFiles();
-      this.props.history.push('/homepage');
-      this.props.history.push('/files');
+      //this.props.history.push('/homepage');
+      //this.props.history.push('/files');
     })
     .catch(err => {
       window.alert('Error uploading files :(');
       this.refs.files.removeFiles();
-      this.props.history.push('/homepage');
-      this.props.history.push('/files');
     })
 
   }
 
   render(){
-    if(this.props.select.username==''){
-      this.forceUpdate();
-    }
     /*var status;
     API.files(this.props.select.username)
         .then((res) => {
@@ -153,10 +147,11 @@ class Files1 extends Component {
               });
           }
         });*/
-    console.log(this.state.files1);
-    var files1 = this.state.files1.map(function(item,index){
+    var files2=this.props.select.file;
+    //var files1 = this.props.select.file.map(function(item,index){
+    var files1 = files2.map(function(item,index){
       return(
-        <div>
+        <div key={index}>
           <button className="btn btn-primary" id='dwn' type="button" onClick = {() => this.onDownload(item)}>Download</button>
           <button className="btn btn-primary" id='del' type="button" onClick = {() => this.onDelete(item)}>Delete</button>
           <button className="btn btn-primary" id='str' type="button" onClick = {() => this.onStar(item)}>Star</button>
@@ -231,7 +226,7 @@ class Files1 extends Component {
               </div>
             </div>
             <button className='upload-button'>
-              <Files id='f1'
+              <Files
                 ref='files'
                 className='files-dropzone-list'
                 onChange={this.onFilesChange}
@@ -274,5 +269,15 @@ const mapStateToProps = (state) => {
   };
 };
 
+const mapDispatchToProps = (dispatch) => {
+  return{
+    fileChange: (file) => {
+        dispatch({
+        type: "CHANGEFILE",
+        payload : {file:file}
+      });
+    },
+  };
+};
 
-export default withRouter(connect(mapStateToProps)(Files1));
+export default withRouter(connect(mapStateToProps,mapDispatchToProps)(Files1));

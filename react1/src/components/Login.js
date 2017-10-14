@@ -1,9 +1,6 @@
 import React, {Component} from 'react';
 import {
-  BrowserRouter as Router,
-  Route,
   Link,
-  Redirect,
   withRouter
 } from 'react-router-dom';
 import './Login.css';
@@ -14,22 +11,20 @@ class Login extends Component {
     state = {
         username: '',
         password: '',
-        isLoggedIn: false,
+        //isLoggedIn: false,
         message: ''
     };
 
     login() {
-      console.log('login done..');
       this.props.history.push("/homepage");
     }
 
     handleSubmit = (userdata) => {
-      console.log(userdata);
-      if(this.state.username=="" || this.state.password===""){
-        this.setState({
+      if(this.state.username==="" || this.state.password===""){
+        /*this.setState({
             isLoggedIn: false,
             message: "Please enter both username and password!!"
-        });
+        });*/
         document.getElementById('error1').style.display="block";
       } else {
         var status;
@@ -39,26 +34,25 @@ class Login extends Component {
               return res.json();
             }).then((json) => {
               if (status === 201) {
-                  this.setState({
+                  /*this.setState({
                       isLoggedIn: true
-                  });
-                  console.log(status);
+                  });*/
                   const token = json.token;
                   localStorage.setItem('jwtToken',token);
                   //this.props.storeToken(localStorage.getItem('jwtToken'));
                   this.login();
               } else if (status === 401) {
-                  this.setState({
+                  /*this.setState({
                       isLoggedIn: false,
                       message: "Wrong username or password. Try again..!!"
-                  });
+                  });*/
                   document.getElementById('error1').style.display="block";
                   //this.login1();
               } else {
-                      this.setState({
+                      /*this.setState({
                           isLoggedIn: false,
                           message: "Something went Wrong..!!"
-                  });
+                        });*/
                   document.getElementById('error1').style.display="block";
                   //this.login1();
               }
@@ -67,7 +61,6 @@ class Login extends Component {
       };
 
     render() {
-      console.log(this.props.select1);
         return (
           <div>
             <div className="container">

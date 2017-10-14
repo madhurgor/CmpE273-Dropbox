@@ -1,15 +1,10 @@
 import React, {Component} from 'react';
 import {
-  BrowserRouter as Router,
-  Route,
   Link,
-  Redirect,
   withRouter
 } from 'react-router-dom';
 import * as API from '../api/API';
-import PropTypes from 'prop-types'
 import axios from 'axios';
-import Blob from 'blob';
 import FormData from 'form-data';
 import './HomePage.css';
 import Files from 'react-files';
@@ -21,7 +16,7 @@ class HomePage extends Component {
     super(props)
     this.state = {
       files: [],
-      files1:[],
+      //files1:[],
       message:''
     }
   }
@@ -35,22 +30,25 @@ class HomePage extends Component {
     else
     {
       var status;
-      console.log("username"+this.props.select.username);
-      API.filesR(this.props.select.username)
-          .then((res) => {
-            status = res.status;
-            return res.json();
-          }).then((json) => {
-            if (status === 201) {
-                this.setState({
-                files1:json.files
-                });
-            } else {
-                this.setState({
-                message: "Something went Wrong..!!"
-                });
-            }
+      if(this.props.select.username!=="")
+      {
+        API.filesR(this.props.select.username)
+            .then((res) => {
+              status = res.status;
+              return res.json();
+            }).then((json) => {
+              if (status === 201) {
+                  //this.setState({
+                  //  files1:json.files
+                  //});
+                  this.props.fileChangeR(json.files);
+              } else {
+                  this.setState({
+                  message: "Something went Wrong..!!"
+                  });
+              }
           });
+      }
     }
   }
 
@@ -58,8 +56,6 @@ class HomePage extends Component {
     this.setState({
       files
     }, () => {
-      console.log('on file change-->')
-      console.log(this.state.files);
     })
   }
 
@@ -69,8 +65,6 @@ class HomePage extends Component {
 
   onSignOut = () => {
    localStorage.removeItem('jwtToken');
-   console.log(this.props);
-   this.props.storeRestore;
    window.location.replace('/');
   }
 
@@ -98,31 +92,25 @@ class HomePage extends Component {
 
   filesUpload = () => {
     var formData = new FormData()
-    console.log('on file upload-->');
-    console.log(this.state.files);
     Object.keys(this.state.files).forEach((key) => {
       const file = this.state.files[key]
-      console.log('before form data --> file');
-      console.log(file);
       formData.append(key, file, file.name || 'file')
       //formData.append(key, new Blob([file], { type: file.type }), file.name || 'file')
-      console.log('after form data');
-      console.log(formData);
     })
     axios.post(`http://localhost:3001/users/files`, formData, {params:{'username':`${this.props.select.username}`}})
-    .then(response => {window.alert(`${this.state.files.length} files uploaded succesfully!`);this.refs.files.removeFiles();window.location.replace('/homepage');})
+    .then(response => {
+      window.alert(`${this.state.files.length} files uploaded succesfully!`);
+      this.refs.files.removeFiles();
+    })
     .catch(err => {window.alert('Error uploading files :(');this.refs.files.removeFiles();window.location.replace('/homepage');})
   }
 
   render(){
-  console.log(this.props.select);
-  if(this.props.select.username==''){
-    this.forceUpdate();
-  }
-  console.log(this.state.files1);
-  var files1 = this.state.files1.map(function(item,index){
+    var files2=this.props.select.fileR;
+    //var files1 = this.props.select.file.map(function(item,index){
+    var files1 = files2.map(function(item,index){
     return(
-      <div>
+      <div key={index}>
         <button className="btn btn-primary" id='dwn' type="button" onClick = {() => this.onDownload(item)}>Download</button>
         <button className="btn btn-primary" id='str' type="button" onClick = {() => this.onUnstar(item)}>Unstar</button>
         {item}
@@ -196,7 +184,7 @@ class HomePage extends Component {
               </div>
             </div>
             <button className='upload-button'>
-              <Files id='f1'
+              <Files
                 ref='files'
                 className='files-dropzone-list'
                 onChange={this.onFilesChange}
@@ -234,7 +222,6 @@ class HomePage extends Component {
 }
 
 const mapStateToProps = (state) => {
-  console.log("hello");
   return{
     select: state.reducerUsers
   };
@@ -242,20 +229,14 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return{
-    loginChange: (firstname,lastname) => {
-        dispatch({
-        type: "CHANGELOG",
-        payload :{firstname:firstname,lastname:lastname}
+    fileChangeR: (file) => {
+      dispatch({
+        type: "CHANGEFILER",
+        payload : {fileR:file}
       });
     },
-    /*storeToken: (token) => {
-        dispatch({
-        type: "SETTOKEN",
-        payload : {token:token}
-      });
-    },*/
     userChange: (username) => {
-        dispatch({
+      dispatch({
         type: "CHANGEUSER",
         payload : {username:username}
       });

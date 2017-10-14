@@ -1,18 +1,13 @@
 import React, {Component} from 'react';
 import {
-  BrowserRouter as Router,
-  Route,
   Link,
-  Redirect,
   withRouter
 } from 'react-router-dom';
 import * as API from '../api/API';
-import PropTypes from 'prop-types'
-import axios from 'axios';
-import Blob from 'blob';
-import FormData from 'form-data';
 import './HomePage.css';
 import {connect} from "react-redux";
+
+var data=[];
 
 class About extends Component {
 
@@ -36,44 +31,43 @@ class About extends Component {
     }
     else
     {
-      console.log(this.props.select.username);
       var status;
-      API.about(this.props.select.username)
-          .then((res) => {
-            status = res.status;
-            return res.json();
-          }).then((json) => {
-            if (status === 201) {
-                this.setState({
-                    isLoggedIn: true,
-                    message: "Welcome to my App..!!"
-                });
-                //this.props.loginChange(json.firstname,json.lastname);
-                console.log(status);
-                this.setState({
-                  firstname: json.firstname,
-                  lastname:json.lastname,
-                  work:json.work,
-                  education:json.education,
-                  hobbies:json.hobbies,
-                  phone_no:json.phone_no
-                })
-                //this.props.storeToken(localStorage.getItem('jwtToken'));
-                //this.login();
-            } else if (status === 401) {
-                this.setState({
-                    isLoggedIn: false,
-                    message: "Wrong username or password. Try again..!!"
-                });
-                //this.login1();
+      if(this.props.select.username!=="")
+      {
+        API.about(this.props.select.username)
+            .then((res) => {
+              status = res.status;
+              return res.json();
+            }).then((json) => {
+              if (status === 201) {
+                  this.setState({
+                      isLoggedIn: true,
+                      message: "Welcome to my App..!!"
+                  });
+                  //this.props.loginChange(json.firstname,json.lastname);
+                  this.setState({
+                    firstname:json.firstname,
+                    lastname:json.lastname,
+                    work:json.work,
+                    education:json.education,
+                    hobbies:json.hobbies,
+                    phone_no:json.phone_no
+                  })
+                  data=[json.firstname,
+                        json.lastname,
+                        json.work,
+                        json.education,
+                        json.hobbies,
+                        json.phone_no];
+              this.props.setInfo(data);
             } else {
-                    this.setState({
-                        isLoggedIn: false,
-                        message: "Something went Wrong..!!"
-                });
-                //this.login1();
-            }
-          });
+                  this.setState({
+                    message: "Something went Wrong..!!"
+              });
+                  //this.login1();
+          }
+        });
+      }
     }
   }
 
@@ -83,7 +77,6 @@ class About extends Component {
 
   onSignOut = () => {
    localStorage.removeItem('jwtToken');
-   this.props.storeRestore;
    window.location.replace('/');
   }
 
@@ -139,17 +132,17 @@ class About extends Component {
               <pre>
               Email Address            : {this.props.select.username}
               <br/>
-              First Name:              : {this.state.firstname}
+              First Name:              : {this.props.select.data[0]}
               <br/>
-              Last Name:               : {this.state.lastname}
+              Last Name:               : {this.props.select.data[1]}
               <br/>
-              Work Information:        : {this.state.work}
+              Work Information:        : {this.props.select.data[2]}
               <br/>
-              Education:               : {this.state.education}
+              Education:               : {this.props.select.data[3]}
               <br/>
-              Phone Number:            : {this.state.phone_no}
+              Phone Number:            : {this.props.select.data[5]}
               <br/>
-              Hobbies:                 : {this.state.hobbies}
+              Hobbies:                 : {this.props.select.data[4]}
               </pre>
               <button className='update-info' onClick={this.updateInfo}>Change Information</button>
               </div>
@@ -176,15 +169,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return{
-    storeRestore: () => {
+    setInfo: (data) => {
           dispatch({
-        type: "RESTORE"
-      });
-    },
-
-    getUserData: (data) => {
-          dispatch({
-        type: "CHANGEDATA",
+        type: "SETINFO",
         payload :{data:data}
       });
     },
