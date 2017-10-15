@@ -19,7 +19,9 @@ class About extends Component {
       phone_no:'',
       hobbies:'',
       education:'',
-      work:''
+      work:'',
+      le:'',
+      interest:''
     }
   }
 
@@ -51,14 +53,18 @@ class About extends Component {
                     work:json.work,
                     education:json.education,
                     hobbies:json.hobbies,
-                    phone_no:json.phone_no
+                    phone_no:json.phone_no,
+                    le:json.le,
+                    interest:json.interest
                   })
                   data=[json.firstname,
                         json.lastname,
                         json.work,
                         json.education,
                         json.hobbies,
-                        json.phone_no];
+                        json.phone_no,
+                        json.le,
+                        json.interest];
               this.props.setInfo(data);
             } else {
                   this.setState({
@@ -77,6 +83,7 @@ class About extends Component {
 
   onSignOut = () => {
    localStorage.removeItem('jwtToken');
+   this.props.clear();
    window.location.replace('/');
   }
 
@@ -130,19 +137,23 @@ class About extends Component {
             <div className="row about1">
               <div className="center-block">
               <pre>
-              Email Address            : {this.props.select.username}
+              Email Address           : {this.props.select.username}
               <br/>
-              First Name:              : {this.props.select.data[0]}
+              First Name              : {this.props.select.data[0]}
               <br/>
-              Last Name:               : {this.props.select.data[1]}
+              Last Name               : {this.props.select.data[1]}
               <br/>
-              Work Information:        : {this.props.select.data[2]}
+              Work Information        : {this.props.select.data[2]}
               <br/>
-              Education:               : {this.props.select.data[3]}
+              Education               : {this.props.select.data[3]}
               <br/>
-              Phone Number:            : {this.props.select.data[5]}
+              Phone Number            : {this.props.select.data[5]}
               <br/>
-              Hobbies:                 : {this.props.select.data[4]}
+              Hobbies                 : {this.props.select.data[4]}
+              <br/>
+              Life Events             : {this.props.select.data[6]}
+              <br/>
+              Interest                : {this.props.select.data[7]}
               </pre>
               <button className='update-info' onClick={this.updateInfo}>Change Information</button>
               </div>
@@ -173,6 +184,11 @@ const mapDispatchToProps = (dispatch) => {
           dispatch({
         type: "SETINFO",
         payload :{data:data}
+      });
+    },
+    clear: () => {
+        dispatch({
+        type: "CLEAR",
       });
     },
   };

@@ -1,5 +1,4 @@
 const reducerUsers = (state = {
-  isLoggedIn: false,
   firstname: '',
   lastname: '',
   username: '',
@@ -10,7 +9,7 @@ const reducerUsers = (state = {
   data:[],
 }, action) => {
   switch(action.type){
-    case "CHANGEUSER":
+    case "CHANGEUSERNAME":
         state={
           ...state,
           username: action.payload.username
@@ -38,6 +37,19 @@ const reducerUsers = (state = {
         state={
           ...state,
           data: action.payload.data
+        };
+    break;
+    case "CLEAR":
+        state={
+          isLoggedIn: false,
+          firstname: '',
+          lastname: '',
+          username: '',
+          password:'',
+          token:'',
+          file:[],
+          fileR:[],
+          data:[],
         };
     break;
     default:

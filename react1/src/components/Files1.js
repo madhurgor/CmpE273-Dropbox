@@ -89,6 +89,7 @@ class Files1 extends Component {
 
   onSignOut = () => {
    localStorage.removeItem('jwtToken');
+   this.props.clear();
    window.location.replace('/');
   }
 
@@ -275,6 +276,11 @@ const mapDispatchToProps = (dispatch) => {
         dispatch({
         type: "CHANGEFILE",
         payload : {file:file}
+      });
+    },
+    clear: () => {
+        dispatch({
+        type: "CLEAR",
       });
     },
   };

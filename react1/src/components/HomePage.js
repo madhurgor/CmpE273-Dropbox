@@ -65,6 +65,7 @@ class HomePage extends Component {
 
   onSignOut = () => {
    localStorage.removeItem('jwtToken');
+   this.props.clear();
    window.location.replace('/');
   }
 
@@ -235,10 +236,9 @@ const mapDispatchToProps = (dispatch) => {
         payload : {fileR:file}
       });
     },
-    userChange: (username) => {
-      dispatch({
-        type: "CHANGEUSER",
-        payload : {username:username}
+    clear: () => {
+        dispatch({
+        type: "CLEAR",
       });
     },
   };

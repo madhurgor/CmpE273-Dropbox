@@ -20,6 +20,8 @@ class AboutChange extends Component {
       hobbies:'',
       education:'',
       work:'',
+      le:'',
+      interest:'',
       message:''
     }
   }
@@ -47,7 +49,9 @@ class AboutChange extends Component {
                     work:json.work,
                     education:json.education,
                     hobbies:json.hobbies,
-                    phone_no:json.phone_no
+                    phone_no:json.phone_no,
+                    le:json.le,
+                    interest:json.interest
                   })
                   //this.props.storeToken(localStorage.getItem('jwtToken'));
                   //this.login();
@@ -56,7 +60,9 @@ class AboutChange extends Component {
                         json.work,
                         json.education,
                         json.hobbies,
-                        json.phone_no];
+                        json.phone_no,
+                        json.le,
+                        json.interest];
               this.props.setInfo(data);
               } else {
                   this.setState({
@@ -71,7 +77,7 @@ class AboutChange extends Component {
   updateInfo = () => {
     var status
     //console.log("here "+document.getElementById('fn').value);
-    API.aboutChange({username:this.props.select.username,firstname:document.getElementById('fn').value,lastname:document.getElementById('ln').value,phone_no:document.getElementById('phone_no').value,education:document.getElementById('education').value,hobbies:document.getElementById('hobbies').value,work:document.getElementById('work').value})
+    API.aboutChange({username:this.props.select.username,firstname:document.getElementById('fn').value,lastname:document.getElementById('ln').value,phone_no:document.getElementById('phone_no').value,education:document.getElementById('education').value,hobbies:document.getElementById('hobbies').value,work:document.getElementById('work').value,le:document.getElementById('le').value,interest:document.getElementById('interest').value})
     .then((res) => {
       status = res.status;
       return res.json();
@@ -86,6 +92,7 @@ class AboutChange extends Component {
 
   onSignOut = () => {
    localStorage.removeItem('jwtToken');
+   this.props.clear();
    window.location.replace('/');
   }
 
@@ -139,19 +146,23 @@ class AboutChange extends Component {
             <div className="row about1">
               <div className="center-block">
               <pre>
-              Email Address            : {this.props.select.username}
+              Email Address           : {this.props.select.username}
               <br/>
-              First Name:              : <input type='text' id='fn' placeholder={this.props.select.data[0]}/>
+              First Name              : <input type='text' id='fn' placeholder={this.props.select.data[0]}/>
               <br/>
-              Last Name:               : <input type='text' id='ln' placeholder={this.props.select.data[1]}/>
+              Last Name               : <input type='text' id='ln' placeholder={this.props.select.data[1]}/>
               <br/>
-              Work Information:        : <input type='text' id='work' placeholder={this.props.select.data[2]}/>
+              Work Information        : <input type='text' id='work' placeholder={this.props.select.data[2]}/>
               <br/>
-              Education:               : <input type='text' id='education' placeholder={this.props.select.data[3]}/>
+              Education               : <input type='text' id='education' placeholder={this.props.select.data[3]}/>
               <br/>
-              Phone Number:            : <input type='text' id='phone_no' placeholder={this.props.select.data[5]}/>
+              Phone Number            : <input type='text' id='phone_no' placeholder={this.props.select.data[5]}/>
               <br/>
-              Hobbies:                 : <input type='text' id='hobbies' placeholder={this.props.select.data[4]}/>
+              Hobbies                 : <input type='text' id='hobbies' placeholder={this.props.select.data[4]}/>
+              <br/>
+              Life Events             : <input type='text' id='le' placeholder={this.props.select.data[6]}/>
+              <br/>
+              Interest                : <input type='text' id='interest' placeholder={this.props.select.data[7]}/>
               </pre>
               <div className='row'>
                 <button className='update-info' onClick={this.updateInfo}>Update Information</button>
@@ -185,6 +196,11 @@ const mapDispatchToProps = (dispatch) => {
           dispatch({
         type: "SETINFO",
         payload :{data:data}
+      });
+    },
+    clear: () => {
+        dispatch({
+        type: "CLEAR",
       });
     },
   };

@@ -59,7 +59,7 @@ export const aboutChange = (payload) =>
             ...headers,
             'Content-Type': 'application/json'
           },
-        body: JSON.stringify({username:payload.username,firstname:payload.firstname,lastname:payload.lastname,phone_no:payload.phone_no,education:payload.education,hobbies:payload.hobbies,work:payload.work})
+        body: JSON.stringify({username:payload.username,firstname:payload.firstname,lastname:payload.lastname,phone_no:payload.phone_no,education:payload.education,hobbies:payload.hobbies,work:payload.work,le:payload.le,interest:payload.interest})
     }).then(res => {
         return res;
       })

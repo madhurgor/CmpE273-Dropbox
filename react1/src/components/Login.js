@@ -21,10 +21,10 @@ class Login extends Component {
 
     handleSubmit = (userdata) => {
       if(this.state.username==="" || this.state.password===""){
-        /*this.setState({
-            isLoggedIn: false,
+        this.setState({
+            //isLoggedIn: false,
             message: "Please enter both username and password!!"
-        });*/
+        });
         document.getElementById('error1').style.display="block";
       } else {
         var status;
@@ -42,17 +42,17 @@ class Login extends Component {
                   //this.props.storeToken(localStorage.getItem('jwtToken'));
                   this.login();
               } else if (status === 401) {
-                  /*this.setState({
-                      isLoggedIn: false,
+                  this.setState({
+                      //isLoggedIn: false,
                       message: "Wrong username or password. Try again..!!"
-                  });*/
+                  });
                   document.getElementById('error1').style.display="block";
                   //this.login1();
               } else {
-                      /*this.setState({
-                          isLoggedIn: false,
+                      this.setState({
+                          //isLoggedIn: false,
                           message: "Something went Wrong..!!"
-                        });*/
+                        });
                   document.getElementById('error1').style.display="block";
                   //this.login1();
               }
@@ -95,7 +95,7 @@ class Login extends Component {
                                 placeholder="Enter Username"
                                 value={this.state.username}
                                 onChange={(event) => {
-                                    this.props.userChange(event.target.value)
+                                    this.props.changeUsername(event.target.value)
                                     this.setState({
                                       username: event.target.value
                                     });
@@ -151,9 +151,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return{
-    userChange: (username) => {
+    changeUsername: (username) => {
         dispatch({
-        type: "CHANGEUSER",
+        type: "CHANGEUSERNAME",
         payload : {username:username}
       });
     },

@@ -4,7 +4,10 @@ var mysql = require('./mysql');
 var multer = require('multer');
 var fs = require('fs');
 var path = require('path');
-var jwt = require('jsonwebtoken')
+var jwt = require('jsonwebtoken');
+var bcrypt = require('bcrypt');
+
+const saltRounds = 10;
 
 var bodyParser = require('body-parser');
 router.use(bodyParser.json());
@@ -23,12 +26,30 @@ router.post('/login',urlencodedParser,function(req,res){
   var crypt = 'dropbox_012465401';
   //res.status(201).json({message: 'all set'});
 
-    const fetchDataSQL = "select * from users where username='"+req.body.username+"' and password='"+req.body.password+"'";
+    /*const fetchDataSQL = "select * from users where username='"+req.body.username+"' and password='"+req.body.password+"'";
     mysql.fetchData(function(err,results){
        if(err){
           throw err;
        } else {
           if(results.length > 0) {
+            const token = jwt.sign({
+              username: req.body.username
+            }, crypt)
+             //console.log("Data: " + results[0].count);
+             //res.status(201).res.json({count: results[0].count});
+             res.status(201).json({message: "Data found", token:token});
+          } else {
+             //console.log("No data");
+             res.status(401).json({message: "No data"});
+          }
+       }
+    }, fetchDataSQL);*/
+    const fetchDataSQL = "select * from users where username='"+req.body.username+"'";
+    mysql.fetchData(function(err,results){
+       if(err){
+          throw err;
+       } else {
+          if(results.length > 0 && bcrypt.compareSync(req.body.password, results[0].password)) {
             const token = jwt.sign({
               username: req.body.username
             }, crypt)
@@ -54,22 +75,23 @@ router.post('/signup',urlencodedParser,function (req, res) {
            //console.log("Data: " + results[0].count);
            //res.status(201).res.json({count: results[0].count});
            //res.status(201).json({message: "Data found"});
-          const insertDataSQL = "insert into users(firstname,lastname,username,password) values('"+req.body.firstname+"','"+req.body.lastname+"','"+req.body.username+"','"+req.body.password+"')";
+           bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+             const insertDataSQL = "insert into users(firstname,lastname,username,password) values('"+req.body.firstname+"','"+req.body.lastname+"','"+req.body.username+"','"+hash+"')";
 
-          mysql.insertData((err, results) => {
-             if(err){
-            throw err;
-          }
-          else
-          {
-            console.log("No. of results after insertion:" + results.affectedRows);
-            mkdirSync('../'+req.body.username);
-            mkdirSync('../'+req.body.username+'/normal');
-            mkdirSync('../'+req.body.username+'/star');
-            res.status(201).json(results);
-             }
-          },insertDataSQL);
-
+             mysql.insertData((err, results) => {
+               if(err){
+                 throw err;
+               }
+               else
+               {
+                 console.log("No. of results after insertion:" + results.affectedRows);
+                 mkdirSync('../'+req.body.username);
+                 mkdirSync('../'+req.body.username+'/normal');
+                 mkdirSync('../'+req.body.username+'/star');
+                 res.status(201).json(results);
+               }
+             },insertDataSQL);
+           });
         } else {
            //console.log("No data");
            res.status(200).json({message: "Already a user..!!"});
@@ -137,7 +159,7 @@ router.post('/about',urlencodedParser,function (req, res) {
         if(results.length > 0) {
            //console.log("Data: " + results[0].count);
            //res.status(201).res.json({count: results[0].count});
-           res.status(201).json({message: "Data found", firstname:results[0].firstname, lastname:results[0].lastname, hobbies:results[0].hobbies, education:results[0].education, work:results[0].work, phone_no:results[0].phone_no});
+           res.status(201).json({message: "Data found", firstname:results[0].firstname, lastname:results[0].lastname, hobbies:results[0].hobbies, education:results[0].education, work:results[0].work, phone_no:results[0].phone_no, le:results[0].le, interest:results[0].interest});
         } else {
            //console.log("No data");
            res.status(401).json({message: "No data"});
@@ -149,7 +171,7 @@ router.post('/about',urlencodedParser,function (req, res) {
 router.post('/about_change',urlencodedParser,function(req, res) {
   console.log(req.body);
   //const insertDataSQL = "insert into users values('"+req.body.firstname+"','"+req.body.lastname+"','"+req.body.username+"','"+req.body.password+"')";
-  const  insertDataSQL = "update users set firstname='"+req.body.firstname+"', lastname='"+req.body.lastname+"', phone_no='"+req.body.phone_no+"', education='"+req.body.education+"', hobbies='"+req.body.hobbies+"', work='"+req.body.work+"' where username='"+req.body.username+"'";
+  const  insertDataSQL = "update users set firstname='"+req.body.firstname+"', lastname='"+req.body.lastname+"', phone_no='"+req.body.phone_no+"', education='"+req.body.education+"', hobbies='"+req.body.hobbies+"', work='"+req.body.work+"', le='"+req.body.le+"', interest='"+req.body.interest+"' where username='"+req.body.username+"'";
 
   /*mysql.updateData((err, results) => {
     if(err){
