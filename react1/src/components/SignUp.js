@@ -40,8 +40,7 @@ export class SignUp extends Component {
                   });
                   document.getElementById('error2').style.display="block";
                   //this.login1();
-              }
-                  else {
+              } else {
                     this.setState({
                       message: "Something went wrong in sign up..!!"
                   });

@@ -35,7 +35,10 @@ class Files1 extends Component {
         API.files(this.props.select.username)
             .then((res) => {
               status = res.status;
-              return res.json();
+              try{
+                return res.json();
+              }
+              catch(err){window.alert(`Some Error: ${err}`);}
             }).then((json) => {
               if (status === 201) {
                   //this.setState({
@@ -89,6 +92,12 @@ class Files1 extends Component {
 
   onSignOut = () => {
    localStorage.removeItem('jwtToken');
+   axios.get(`http://localhost:3001/users/signout`,{params:{username:this.props.select.username}})
+      .then((res) => {
+        console.log('Signed Out Successfully..!!');
+      }).catch((err) => {
+        console.log('Some error in Sign Out..!!');
+   })
    this.props.clear();
    window.location.replace('/');
   }
@@ -104,31 +113,34 @@ class Files1 extends Component {
     console.log('error code ' + error.code + ': ' + error.message)
   }
 
-  filesUpload = () => {
-    var formData = new FormData()
-    Object.keys(this.state.files).forEach((key) => {
-      const file = this.state.files[key]
-      formData.append(key, file, file.name || 'file')
-      //formData.append(key, new Blob([file], { type: file.type }), file.name || 'file')
-    })
-    axios.post(`http://localhost:3001/users/files`, formData, {params:{'username':`${this.props.select.username}`}})
-    .then(response => {
-      window.alert(`${this.state.files.length} files uploaded succesfully!`);
+  onFilesUpload = () => {
+    if(this.state.files.length>0){
+      var formData = new FormData()
       Object.keys(this.state.files).forEach((key) => {
         const file = this.state.files[key]
-        var ft1=this.props.select.file;
-        ft1.push(file.name);
-        this.props.fileChange(ft1)
+        formData.append(key, file, file.name || 'file')
+        //formData.append(key, new Blob([file], { type: file.type }), file.name || 'file')
       })
-      this.refs.files.removeFiles();
-      //this.props.history.push('/homepage');
-      //this.props.history.push('/files');
-    })
-    .catch(err => {
-      window.alert('Error uploading files :(');
-      this.refs.files.removeFiles();
-    })
-
+      axios.post(`http://localhost:3001/users/files`, formData, {params:{'username':`${this.props.select.username}`}})
+      .then(response => {
+        window.alert(`${this.state.files.length} files uploaded succesfully!`);
+        Object.keys(this.state.files).forEach((key) => {
+          const file = this.state.files[key]
+          var ft1=this.props.select.file;
+          ft1.push(file.name);
+          this.props.fileChange(ft1)
+        })
+        this.refs.files.removeFiles();
+        //this.props.history.push('/homepage');
+        //this.props.history.push('/files');
+      })
+      .catch(err => {
+        window.alert('Error uploading files :(');
+        this.refs.files.removeFiles();
+      })
+    }else{
+      window.alert(`Please select file first by clicking on "Select File" button!!`);
+    }
   }
 
   render(){
@@ -256,7 +268,7 @@ class Files1 extends Component {
                 </div>
                 : null
               }
-              <button className='upload-submit' onClick={this.filesUpload}>Upload</button>
+              <button className='upload-submit' onClick={this.onFilesUpload}>Upload</button>
           </div>
         </div>
       </div>

@@ -31,7 +31,10 @@ class Login extends Component {
         API.doLogin(userdata)
             .then((res) => {
               status = res.status;
-              return res.json();
+              try{
+                return res.json();
+              }
+              catch(err){console.log(err);}
             }).then((json) => {
               if (status === 201) {
                   /*this.setState({
@@ -56,7 +59,7 @@ class Login extends Component {
                   document.getElementById('error1').style.display="block";
                   //this.login1();
               }
-            });
+          });
         }
       };
 

@@ -6,6 +6,7 @@ import {
 import * as API from '../api/API';
 import './HomePage.css';
 import {connect} from "react-redux";
+import axios from 'axios';
 
 var data;
 
@@ -40,7 +41,10 @@ class AboutChange extends Component {
         API.about(this.props.select.username)
             .then((res) => {
               status = res.status;
-              return res.json();
+              try{
+                return res.json();
+              }
+              catch(err){window.alert(`Some Error: ${err}`);}
             }).then((json) => {
               if (status === 201) {
                   this.setState({
@@ -80,7 +84,10 @@ class AboutChange extends Component {
     API.aboutChange({username:this.props.select.username,firstname:document.getElementById('fn').value,lastname:document.getElementById('ln').value,phone_no:document.getElementById('phone_no').value,education:document.getElementById('education').value,hobbies:document.getElementById('hobbies').value,work:document.getElementById('work').value,le:document.getElementById('le').value,interest:document.getElementById('interest').value})
     .then((res) => {
       status = res.status;
-      return res.json();
+      try{
+        return res.json();
+      }
+      catch(err){window.alert(`Some Error: ${err}`);}
     }).then((json) => {
       if (status === 201) {
           this.props.history.push('/about');
@@ -92,6 +99,12 @@ class AboutChange extends Component {
 
   onSignOut = () => {
    localStorage.removeItem('jwtToken');
+   axios.get(`http://localhost:3001/users/signout`,{params:{username:this.props.select.username}})
+      .then((res) => {
+        console.log('Signed Out Successfully..!!');
+      }).catch((err) => {
+        console.log('Some error in Sign Out..!!');
+   })
    this.props.clear();
    window.location.replace('/');
   }

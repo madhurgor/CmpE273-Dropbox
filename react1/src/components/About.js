@@ -6,6 +6,7 @@ import {
 import * as API from '../api/API';
 import './HomePage.css';
 import {connect} from "react-redux";
+import axios from 'axios';
 
 var data=[];
 
@@ -39,7 +40,10 @@ class About extends Component {
         API.about(this.props.select.username)
             .then((res) => {
               status = res.status;
-              return res.json();
+              try{
+                return res.json();
+              }
+              catch(err){window.alert(`Some Error: ${err}`);}
             }).then((json) => {
               if (status === 201) {
                   this.setState({
@@ -83,6 +87,12 @@ class About extends Component {
 
   onSignOut = () => {
    localStorage.removeItem('jwtToken');
+   axios.get(`http://localhost:3001/users/signout`,{params:{username:this.props.select.username}})
+      .then((res) => {
+        console.log('Signed Out Successfully..!!');
+      }).catch((err) => {
+        console.log('Some error in Sign Out..!!');
+   })
    this.props.clear();
    window.location.replace('/');
   }

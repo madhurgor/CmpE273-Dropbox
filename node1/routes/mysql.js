@@ -22,15 +22,17 @@ function fetchData(callback,sqlQuery){
 	connection.query(sqlQuery, function(err, rows, fields) {
 		if(err){
 			console.log("ERROR: " + err.message);
+			connection.end();
+			console.log("\nConnection closed..");
 		}
 		else
 		{	// return err or result
 			console.log("DB Results:"+rows);
 			callback(err, rows);
+			connection.end();
+			console.log("\nConnection closed..");
 		}
 	});
-	console.log("\nConnection closed..");
-	connection.end();
 }
 
 function insertData(callback,sql){
@@ -42,16 +44,18 @@ function insertData(callback,sql){
 	connection.query(sql, function(err, result) {
 		if(err){
 			console.log("ERROR: " + err.message);
+			connection.end();
+			console.log("\nConnection closed..");
 		}
 		else
 		{	// return err or result
 			console.log("DB Results:"+result);
 			callback(err, result);
+			connection.end();
+			console.log("\nConnection closed..");
 		}
 	});
-	console.log("\nConnection closed..");
-	connection.end();
 }
 
 exports.fetchData=fetchData;
-exports.insertData = insertData;
+exports.insertData=insertData;

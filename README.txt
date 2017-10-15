@@ -9,3 +9,5 @@ Front-end server
 	1. cd react1
 	2. npm install
 	3. npm start
+
+-->upload folder needs to be created in Main Directory if it does not exist, without this folder application will not work..
