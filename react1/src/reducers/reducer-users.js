@@ -5,8 +5,10 @@ const reducerUsers = (state = {
   password:'',
   token:'',
   file:[],
+  folder:[],
   fileR:[],
   data:[],
+  path:'/'
 }, action) => {
   switch(action.type){
     case "CHANGEUSERNAME":
@@ -25,6 +27,18 @@ const reducerUsers = (state = {
         state={
           ...state,
           file: action.payload.file
+        };
+    break;
+    case "CHANGEFOLDER":
+        state={
+          ...state,
+          folder: action.payload.folder
+        };
+    break;
+    case "CHANGEPATH":
+        state={
+          ...state,
+          path: action.payload.path
         };
     break;
     case "CHANGEFILER":
@@ -48,8 +62,10 @@ const reducerUsers = (state = {
           password:'',
           token:'',
           file:[],
+          folder:[],
           fileR:[],
           data:[],
+          path:'/',
         };
     break;
     default:

@@ -228,6 +228,12 @@ class HomePage extends Component {
               : null
             }
             <button className='upload-submit' onClick={this.onFilesUpload}>Upload</button>
+            <div className="row">
+              <div className="center-block">
+                <br/>
+                <button className='shared-folder-button'>New Shared Folder</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

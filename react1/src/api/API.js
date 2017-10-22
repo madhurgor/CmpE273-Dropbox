@@ -75,7 +75,7 @@ export const files = (payload) =>
             ...headers,
             'Content-Type': 'application/json'
           },
-        body: JSON.stringify({username:payload})
+        body: JSON.stringify({username:payload.username,path:payload.path})
     }).then(res => {
         return res;
       })
