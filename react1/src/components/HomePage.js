@@ -89,9 +89,10 @@ class HomePage extends Component {
     console.log('error code ' + error.code + ': ' + error.message)
   }
 
-  onSignOut = () => {
+  /*onSignOut = () => {
    localStorage.removeItem('jwtToken');
-   axios.post(`http://localhost:3001/users/logout`,{credentials:'include',params:{username:this.props.select.username}})
+   console.log(this.props.select.username);
+   axios.get(`http://localhost:3001/users/logout`,{credentials:'include',params:{username:this.props.select.username}})
       .then((res) => {
         console.log('Signed Out Successfully..!!');
       }).catch((err) => {
@@ -99,7 +100,20 @@ class HomePage extends Component {
    })
    this.props.clear();
    window.location.replace('/');
-  }
+ }*/
+
+ onSignOut = () => {
+  localStorage.removeItem('jwtToken');
+  console.log(this.props.select.username);
+  axios.post(`http://localhost:3001/users/logout`,{withCredentials:'include',username:this.props.select.username})
+     .then((res) => {
+       console.log('Signed Out Successfully..!!');
+     }).catch((err) => {
+       console.log('Some error in Sign Out..!!');
+  })
+  this.props.clear();
+  window.location.replace('/');
+ }
 
   onDownload = (item) => {
       axios.get(`http://localhost:3001/users/download`,{params:{file:item,username:this.props.select.username}})

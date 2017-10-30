@@ -179,7 +179,7 @@ router.post('/login',urlencodedParser,function(req,res){
       })
       logger.write(`\r\n${req.body.username} logged in on `+new Date(dt.now()));
 
-      return res.status(201).json({message: "Data found", token:token});
+      res.status(201).json({message: "Data found", token:token});
   })(req, res);
 });
 
@@ -595,11 +595,13 @@ router.get('/unstar',function(req, res){
   res.status(200).json();
 });
 
-router.post('/logout',function(req, res){
+/*router.get('/logout',function(req, res){
 
   console.log(req.session.user);
   req.session.destroy();
   console.log('Session Destroyed');
+
+  console.log(req.query.username);
 
   var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
     flags: 'a'
@@ -610,6 +612,27 @@ router.post('/logout',function(req, res){
     flags: 'a'
   })
   logger.write(`\r\n${req.query.username} signed out on `+new Date(dt.now()));
+
+  res.status(200).json();
+});*/
+
+router.post('/logout',function(req, res){
+
+  console.log(req.session.user);
+  req.session.destroy();
+  console.log('Session Destroyed');
+
+  console.log(req.body.username);
+
+  var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.body.username} ` +'log.txt', {
+    flags: 'a'
+  })
+  logger.write('\r\nSigned out on '+new Date(dt.now()));
+
+  logger = fs.createWriteStream(path.join(__dirname,'../../') +'log.txt', {
+    flags: 'a'
+  })
+  logger.write(`\r\n${req.body.username} signed out on `+new Date(dt.now()));
 
   res.status(200).json();
 });
@@ -685,7 +708,7 @@ router.get('/group_create',function(req, res){
   })
   console.log(group);
 
-  var i=0,m=[],nm=[];
+  var i=0,m=[],nm=[],myObj=[];
 
   group.forEach(function(item){
     MongoClient.connect(url1, function(err, db) {
@@ -696,6 +719,7 @@ router.get('/group_create',function(req, res){
            throw err;
            res.status(401).json({message: "Some Error"});
         } else {
+           myObj.push({group:req.query.grp_name,creator:req.query.username,member:item});
            console.log(results);
            if(results.length > 0) {
               i++;
@@ -712,7 +736,7 @@ router.get('/group_create',function(req, res){
                res.status(202).json({message: "Group already exists!!"});
              }else{
                if(nm.length===0){mkdirSync('../'+req.query.grp_name+' '+req.query.username);
-                 db.collection("groups").insertOne({group:req.query.grp_name,creator:req.query.username,member:item}, function(err, response) {
+                 db.collection("groups").insertMany(myObj, function(err, response) {
                    if(err){
                      throw err;
                      res.status(401).json({message: "Some Error"});
@@ -751,6 +775,11 @@ router.post('/own_groups_files',function(req,res){
             results.forEach((item)=>{
               c++;
               o.push(item.group);
+
+              o=o.filter(function(elem, pos) {
+                return o.indexOf(elem) == pos;
+              })
+
               if(c==results.length){
                 res.status(201).json({message: "Data",ownfolders:o,});
               }

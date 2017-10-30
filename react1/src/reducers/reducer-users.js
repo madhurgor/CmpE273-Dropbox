@@ -40,12 +40,6 @@ const reducerUsers = (state = {
           ofiles: action.payload.ofiles
         };
     break;
-    case "CHANGEOWNFILE":
-        state={
-          ...state,
-          ofiles: action.payload.ofiles
-        };
-    break;
     case "CHANGEFOLDER":
         state={
           ...state,
