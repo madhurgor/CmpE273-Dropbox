@@ -87,7 +87,7 @@ class About extends Component {
 
   onSignOut = () => {
    localStorage.removeItem('jwtToken');
-   axios.get(`http://localhost:3001/users/signout`,{params:{username:this.props.select.username}})
+   axios.post(`http://localhost:3001/users/logout`,{credentials:'include',params:{username:this.props.select.username}})
       .then((res) => {
         console.log('Signed Out Successfully..!!');
       }).catch((err) => {
@@ -117,6 +117,12 @@ class About extends Component {
             <div className="row">
               <div className="center-block">
                 <Link to={`/files/`} className='l2'>Files</Link>
+              </div>
+              <hr/>
+            </div>
+            <div className="row">
+              <div className="center-block">
+                <Link to={`/group/`} className='l2'>Groups</Link>
               </div>
               <hr/>
             </div>

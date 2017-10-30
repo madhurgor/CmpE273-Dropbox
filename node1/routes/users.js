@@ -7,10 +7,28 @@ var path = require('path');
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcrypt');
 var dateTime = require('node-datetime');
+var cookieParser = require('cookie-parser');
+var rimraf = require('rimraf');
+
+//var passport = require("passport");
+//var LocalStrategy = require("passport-local").Strategy;
+var passport = require("passport");
+require('./passport')(passport);
+//var cors = require('cors');
+var mongoSessionURL = "mongodb://localhost:27017/sessions";
+var expressSessions = require("express-session");
+var mongoStore = require("connect-mongo")(expressSessions);
+//var mongoStore = require("connect-mongostore")(expressSessions);
+
+/*var corsOptions = {
+    origin: 'http://localhost:3000',
+    credentials: true,
+}*/
+
 var dt = dateTime.create();
 
 var MongoClient = require('mongodb').MongoClient;
-var url = "mongodb://localhost:27017/login";
+var url1 = "mongodb://localhost:27017/login";
 
 const saltRounds = 10;
 
@@ -18,8 +36,23 @@ var bodyParser = require('body-parser');
 router.use(bodyParser.json());
 var urlencodedParser=bodyParser.urlencoded({extended: false});
 
-
 var upload = multer({ dest: '../uploads/' })
+
+//router.use(cors(corsOptions));
+router.use(cookieParser());
+router.use(expressSessions({
+    secret: "CMPE273_passport",
+    resave: false,
+    //Forces the session to be saved back to the session store, even if the session was never modified during the request
+    saveUninitialized: false, //force to save uninitialized session to db.
+    //A session is uninitialized when it is new but not modified.
+    duration: 30 * 60 * 1000,
+    activeDuration: 5 * 6 * 1000,
+    store: new mongoStore({
+        url: mongoSessionURL
+    })
+}));
+router.use(passport.initialize());
 
 /* GET users listing. */
 router.get('/', function (req, res, next) {
@@ -79,7 +112,7 @@ router.post('/loginWithMySQL',urlencodedParser,function(req,res){
     }, fetchDataSQL);
 });
 
-router.post('/login',urlencodedParser,function(req,res){
+/*router.post('/login',urlencodedParser,function(req,res){
 
   var crypt = 'dropbox_012465401';
 
@@ -116,6 +149,38 @@ router.post('/login',urlencodedParser,function(req,res){
       db.close();
     });
   });
+});*/
+
+router.post('/login',urlencodedParser,function(req,res){
+
+  passport.authenticate('login', function(err, user) {
+      if(err) {
+          res.status(500).json({message: "Some Error"});
+      }
+      if(!user) {
+          res.status(401).json({message: "No data"});
+      }
+      req.session.user = user.username;
+      console.log(req.session.user);
+      console.log("session initilized");
+
+      var crypt = 'dropbox_012465401';
+      const token = jwt.sign({
+        username: req.body.username
+      }, crypt)
+
+      var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.body.username} ` +'log.txt', {
+        flags: 'a'
+      })
+      logger.write('\r\nlogged in on '+new Date(dt.now()));
+
+      logger = fs.createWriteStream(path.join(__dirname,'../../') +'log.txt', {
+        flags: 'a'
+      })
+      logger.write(`\r\n${req.body.username} logged in on `+new Date(dt.now()));
+
+      return res.status(201).json({message: "Data found", token:token});
+  })(req, res);
 });
 
 router.post('/signupWithMySQL',urlencodedParser,function (req, res) {
@@ -164,7 +229,7 @@ router.post('/signupWithMySQL',urlencodedParser,function (req, res) {
 });
 
 router.post('/signup',urlencodedParser,function (req, res) {
-  MongoClient.connect(url, function(err, db) {
+  MongoClient.connect(url1, function(err, db) {
     if (err) throw err;
     var query = { username: req.body.username };
     db.collection("users").find(query).toArray(function(err, results) {
@@ -446,6 +511,18 @@ router.get('/open_folder',function (req, res) {
   res.status(201).json({files:files,folders:folders});
 });
 
+router.get('/delete_folder',function (req, res) {
+
+  rimraf(path.join(__dirname,'../../') + `${req.query.username}/normal/${req.query.path}/${req.query.folder}`, function () {
+    var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
+      flags: 'a'
+    })
+    logger.write('\r\n Folder "'+req.query.folder+'" deleted from '+req.query.path+' on '+new Date(dt.now()));
+    res.status(201).json();
+  });
+
+});
+
 router.post('/files_fetchR',urlencodedParser,function (req, res) {
   var files=[];
 
@@ -518,7 +595,11 @@ router.get('/unstar',function(req, res){
   res.status(200).json();
 });
 
-router.get('/signout',function(req, res){
+router.post('/logout',function(req, res){
+
+  console.log(req.session.user);
+  req.session.destroy();
+  console.log('Session Destroyed');
 
   var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
     flags: 'a'
@@ -566,6 +647,272 @@ router.get('/createfolder',function(req, res){
     }
   }
 
+  res.status(200).json();
+});
+
+router.get('/open_folder',function (req, res) {
+  var files=[],folders=[];
+
+  var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
+    flags: 'a'
+  })
+  logger.write('\r\n Fetching file name/s from folder '+req.query.path+' on '+new Date(dt.now()));
+
+  console.log(path.join(__dirname,'../../') + `${req.query.username}/normal/${req.query.path}/`);
+
+  fs.readdirSync(path.join(__dirname,'../../') + `${req.query.username}/normal/${req.query.path}/`).forEach(file => {
+    if(fs.lstatSync(path.join(__dirname,'../../') + `${req.query.username}/normal/${req.query.path}/${file}`).isDirectory())
+      folders.push(file);
+    else
+      files.push(file);
+
+      console.log(file);
+
+   logger.write('\r\n  Fetched file name \"'+file+'\" on '+new Date(dt.now()));
+
+  })
+
+  logger.write('\r\n End fetching file name/s from folder '+req.query.path+' on '+new Date(dt.now()));
+
+  res.status(201).json({files:files,folders:folders});
+});
+
+router.get('/group_create',function(req, res){
+  console.log(req.query.group);
+  var group=req.query.group.filter((item)=>{return item!==''});
+  var group=group.filter(function(elem, pos) {
+      return group.indexOf(elem) == pos;
+  })
+  console.log(group);
+
+  var i=0,m=[],nm=[];
+
+  group.forEach(function(item){
+    MongoClient.connect(url1, function(err, db) {
+      if (err) throw err;
+      var query = { username: item };
+      db.collection("users").find(query).toArray(function(err, results) {
+        if(err){
+           throw err;
+           res.status(401).json({message: "Some Error"});
+        } else {
+           console.log(results);
+           if(results.length > 0) {
+              i++;
+              m.push(item);
+           } else {
+              i++;
+              nm.push(item);
+           }
+           if(i===group.length){
+             if(err){
+               throw err;
+               res.status(401).json({message: "Some Error"});
+             }else if(fs.existsSync(path.join(__dirname,'../../') + `/${req.query.grp_name} ${req.query.username}`)) {
+               res.status(202).json({message: "Group already exists!!"});
+             }else{
+               if(nm.length===0){mkdirSync('../'+req.query.grp_name+' '+req.query.username);
+                 db.collection("groups").insertOne({group:req.query.grp_name,creator:req.query.username,member:item}, function(err, response) {
+                   if(err){
+                     throw err;
+                     res.status(401).json({message: "Some Error"});
+                   }else{
+                     res.status(201).json({message: "Data",member:m,notMember:nm});
+                   }
+                 });
+               }else{
+                 res.status(201).json({message: "Data",member:m,notMember:nm});
+               }
+             }
+           }
+        }
+        db.close();
+      });
+    });
+  });
+});
+
+router.post('/own_groups_files',function(req,res){
+  var o=[];
+
+  console.log(req.body.username);
+
+  MongoClient.connect(url1, function(err, db) {
+    if (err) throw err;
+    var query = { creator: req.body.username };
+    db.collection("groups").find(query).toArray(function(err, results) {
+      if(err){
+         throw err;
+         res.status(401).json({message: "Some Error"});
+      } else {
+         console.log(results);
+         if(results.length > 0) {
+            var c=0;
+            results.forEach((item)=>{
+              c++;
+              o.push(item.group);
+              if(c==results.length){
+                res.status(201).json({message: "Data",ownfolders:o,});
+              }
+            });
+         } else {
+            console.log("No data");
+            res.status(401).json({message: "No data"});
+         }
+      }
+      db.close();
+    });
+  });
+});
+
+router.post('/shared_groups_files',function(req,res){
+  var g=[];
+
+  console.log(req.body.username);
+
+  MongoClient.connect(url1, function(err, db) {
+    if (err) throw err;
+    var query = { member: req.body.username };
+    db.collection("groups").find(query).toArray(function(err, results) {
+      if(err){
+         throw err;
+         res.status(401).json({message: "Some Error"});
+      } else {
+         console.log(results);
+         if(results.length > 0) {
+            var c=0;
+            results.forEach((item)=>{
+              c++;
+              g.push({creator:item.creator,folders:item.group});
+              if(c==results.length){
+                res.status(201).json({message: "Data",groupfolders:g});
+              }
+            });
+         } else {
+            console.log("No data");
+            res.status(401).json({message: "No data"});
+         }
+      }
+      db.close();
+    });
+  });
+});
+
+router.get('/open_ownshared_folder',function (req, res) {
+  var ownfiles=[];
+
+  fs.readdirSync(path.join(__dirname,'../../') + `${req.query.ownfolder} ${req.query.username}`).forEach(file => {
+    ownfiles.push(file);
+    console.log(file);
+  })
+
+  res.status(201).json({ownfiles:ownfiles});
+});
+
+router.get('/delete_own',function (req, res) {
+  rimraf(path.join(__dirname,'../../') + `${req.query.ownfolder} ${req.query.username}`, function () {
+    var logger = fs.createWriteStream(path.join(__dirname,'../../') + `/${req.query.username} ` +'log.txt', {
+      flags: 'a'
+    })
+    logger.write('\r\n Shared Folder "'+req.query.folder+'" by user "'+req.query.username+'" deleted on '+new Date(dt.now()));
+
+    MongoClient.connect(url1, function(err, db) {
+      if (err) throw err;
+      var myquery = { group: req.query.ownfolder, creator: req.query.username };
+      db.collection("groups").deleteOne(myquery, function(err, obj) {
+        if (err) {throw err;res.status(401).json();}
+        console.log("1 document deleted");
+        res.status(201).json();
+        db.close();
+      });
+    });
+  });
+});
+
+router.post('/files_fetch_own',urlencodedParser,function (req, res) {
+  var files=[];
+
+  console.log(req.body.folder);
+  console.log(req.body.username);
+
+  fs.readdirSync(path.join(__dirname,'../../') + `${req.body.folder} ${req.body.username}/`).forEach(file => {
+   files.push(file);
+   console.log(file);
+  })
+
+  res.status(201).json({files:files});
+});
+
+router.post('/files_fetch_shared',urlencodedParser,function (req, res) {
+  var files=[];
+
+  console.log(req.body.folder);
+  console.log(req.body.username);
+
+  fs.readdirSync(path.join(__dirname,'../../') + `${req.body.folder} ${req.body.creator}/`).forEach(file => {
+   files.push(file);
+   console.log(file);
+  })
+
+  res.status(201).json({files:files});
+});
+
+router.post('/filesO', upload.any(), function (req, res, next) {
+   if (!req.files) {
+      return next(new Error('No files uploaded'))
+   }
+
+   req.files.forEach((file) => {
+      var n1=0;
+      while(true)
+      {
+        if(!fs.existsSync(path.join(__dirname,'../../') + `/${req.query.folder} ${req.query.username}/` + file.originalname))
+        {
+          fs.rename(path.join(__dirname,'../../') + '/uploads/' + file.filename, path.join(__dirname,'../../') + `/${req.query.folder} ${req.query.username}/` + file.originalname, function(err) {
+                if ( err ) console.log('ERROR: ' + err);
+            });
+
+          //fs.unlinkSync(path.join(__dirname, file.path))
+          break;
+        }
+        else
+        {
+          if(n1==0)
+          {
+            n1+=1;
+            var ext,name,oname=file.originalname,n;
+            n=oname.lastIndexOf(".");
+            ext=oname.substring(n);
+            name=oname.substring(0,n);
+            file.originalname=name+' ('+n1+')'+ext;
+          }
+          else
+          {
+            var ext,name,oname=file.originalname,n;
+            n=oname.lastIndexOf(".");
+            n3=oname.lastIndexOf("(")
+            n2=oname.lastIndexOf(")")
+            newadd=Number(oname.substring(n3+1,n2))+1;
+            ext=oname.substring(n);
+            n3=oname.lastIndexOf('(');
+            name=oname.substring(0,n3+1);
+            file.originalname=name+newadd+')'+ext;
+          }
+        }
+      }
+   })
+
+   res.status(200).end()
+});
+
+router.get('/downloadG',function(req, res){
+
+  res.download(path.join(__dirname,'../../')+`/${req.query.folder} ${req.query.username}/`+`/${req.query.file}`);
+  //res.status(200).json();
+});
+
+router.get('/deleteG',function(req, res){
+  fs.unlinkSync(path.join(__dirname,'../../')+`/${req.query.folder} ${req.query.username}/`+`/${req.query.file}`);
   res.status(200).json();
 });
 

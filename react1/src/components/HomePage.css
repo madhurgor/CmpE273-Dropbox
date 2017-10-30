@@ -56,6 +56,28 @@
     background-color: #0070E0;
 }
 
+.create-shared-folder-button {
+    line-height: 32px;
+    padding: 0 16px;
+    font-weight: 500;
+    border: none;
+    color: #FFF;
+    background-color: #0070E0;
+}
+
+.close-shared-folder-button {
+    line-height: 32px;
+    padding: 0 16px;
+    font-weight: 500;
+    border: none;
+    color: #FFF;
+    background-color: #0070E0;
+}
+
+.close-shared-folder-button .create-shared-folder-button{
+    display:inline-block;
+}
+
 .folder-button {
     margin-left: 5%;
     line-height: 32px;
