@@ -7,9 +7,7 @@ import * as API from '../api/API';
 import axios from 'axios';
 import FormData from 'form-data';
 import './HomePage.css';
-import Files from 'react-files';
 import {connect} from 'react-redux';
-import FileDownload from 'js-file-download';
 
 class Groups extends Component {
   constructor (props) {

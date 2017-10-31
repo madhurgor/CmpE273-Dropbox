@@ -12,6 +12,8 @@ import {connect} from 'react-redux';
 import FileDownload from 'js-file-download';
 import Modal from 'react-modal';
 
+var fileShare;
+
 const customStyles = {
   content : {
     top                   : '40%',
@@ -31,10 +33,14 @@ class Files1 extends Component {
       //files1:[],
       message:'',
       childVisible:false,
-      modalIsOpen:false
+      modalIsOpen:false,
+      modalIsOpen1:false
     }
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
+
+    this.openModal1 = this.openModal1.bind(this);
+    this.closeModal1 = this.closeModal1.bind(this);
   }
 
   componentWillMount(){
@@ -80,16 +86,42 @@ class Files1 extends Component {
     this.setState({modalIsOpen: false});
   }
 
+  openModal1() {
+    this.setState({modalIsOpen1: true});
+  }
+
+  closeModal1() {
+    this.setState({modalIsOpen1: false});
+  }
+
   onDownload = (item) => {
       axios.get(`http://localhost:3001/users/download`,{params:{file:item,username:this.props.select.username,path:this.props.select.path}})
          .then((res) => {
-           //console.log(res);
+           console.log(res);
            console.log('downloaded..');
-           FileDownload(res.data,item);
+           FileDownload(res.data.data,item);
          }).catch((err) => {
            window.alert(`${item} cannot be downloaded!! Please try again later..`)
-         })
-    }
+      })
+  }
+
+  onShare = (item) => {
+      fileShare=item;
+      this.openModal1();
+  }
+
+  onShareFile = () => {
+      axios.get(`http://localhost:3001/users/share`,{params:{file:fileShare,username:this.props.select.username,path:this.props.select.path,member:[document.getElementById('s1').value,document.getElementById('s2').value,document.getElementById('s3').value,document.getElementById('s4').value,document.getElementById('s5').value,]}})
+         .then((res) => {
+           //console.log(res);
+           console.log('shared..');
+           window.alert(`${fileShare} shared succesfully!!`)
+           this.closeModal1();
+         }).catch((err) => {
+           window.alert(`${fileShare} cannot be shared!! Please try again later..`)
+           this.closeModal1();
+      })
+  }
 
   onDelete = (item) => {
     if(window.confirm('Delete File?')){
@@ -334,6 +366,7 @@ class Files1 extends Component {
       return(
         <div key={index}>
           <button className="btn btn-primary" id='dwn' type="button" onClick = {() => this.onDownload(item)}>Download</button>
+          <button className="btn btn-primary" id='shr' type="button" onClick = {() => this.onShare(item)}>Share</button>
           <button className="btn btn-primary" id='del' type="button" onClick = {() => this.onDelete(item)}>Delete</button>
           <button className="btn btn-primary" id='str' type="button" onClick = {() => this.onStar(item)}>Star</button>
           {item}
@@ -404,7 +437,6 @@ class Files1 extends Component {
           <div className="col-md-7 d2">
             <Modal
               isOpen={this.state.modalIsOpen}
-              onAfterOpen={this.afterOpenModal}
               onRequestClose={this.closeModal}
               style={customStyles}
               contentLabel="Example Modal"
@@ -425,6 +457,29 @@ class Files1 extends Component {
               <div>
                 <button onClick={()=>{this.onGroupCreate()}} className="create-shared-folder-button">Create Group</button><br/><br/>
                 <button className="close-shared-folder-button" onClick={this.closeModal}>Close</button><br/>
+              </div>
+            </Modal>
+            <Modal
+              isOpen={this.state.modalIsOpen1}
+              onRequestClose={this.closeModal1}
+              style={customStyles}
+              contentLabel="Example Modal"
+            >
+              <h4>Enter Email Address of the Persons to</h4>
+              <h4>&nbsp;&nbsp;&nbsp;&nbsp;Whom You Want to Share Your File:</h4>
+              <input id="s1" placeholder="Email Address 1"/><br/>
+              <input id="s2" placeholder="Email Address 2"/><br/>
+              <input id="s3" placeholder="Email Address 3"/><br/>
+              <input id="s4" placeholder="Email Address 4"/><br/>
+              <input id="s5" placeholder="Email Address 5"/><br/><br/>
+              <div className="form-group">
+                <div className="col-md-12">
+                  <div id='error1' className="c-card--error">{this.state.message}</div>
+                </div>
+              </div>
+              <div>
+                <button onClick={()=>{this.onShareFile()}} className="create-shared-folder-button">Share</button><br/><br/>
+                <button className="close-shared-folder-button" onClick={this.closeModal1}>Close</button><br/>
               </div>
             </Modal>
             <div className="row">

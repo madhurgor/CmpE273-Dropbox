@@ -90,7 +90,6 @@ const reducerUsers = (state = {
     break;
     case "CLEAR":
         state={
-          isLoggedIn: false,
           firstname: '',
           lastname: '',
           username: '',
@@ -103,6 +102,9 @@ const reducerUsers = (state = {
           path:'/',
           ownfolders:[],
           groupfolders:[],
+          group_o:'',
+          group_s:{},
+          ofiles:[]
         };
     break;
     default:
