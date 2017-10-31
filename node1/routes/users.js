@@ -982,8 +982,8 @@ router.get('/share',function(req, res){
       }*/
       service: 'gmail',
        auth: {
-              user: 'dummyemail14061994@gmail.com',
-              pass: '1234qwerasdfzxcv'
+              user: 'youremail@address.com@gmail.com',
+              pass: 'yourpassword'
        }
     });
 
@@ -1070,8 +1070,8 @@ router.get('/shareS',function(req, res){
       }*/
       service: 'gmail',
        auth: {
-              user: 'dummyemail14061994@gmail.com',
-              pass: '1234qwerasdfzxcv'
+              user: 'youremail@address.com@gmail.com',
+              pass: 'yourpassword'
        }
     });
 
@@ -1158,8 +1158,8 @@ router.get('/shareO',function(req, res){
       }*/
       service: 'gmail',
        auth: {
-              user: 'dummyemail14061994@gmail.com',
-              pass: '1234qwerasdfzxcv'
+              user: 'youremail@address.com@gmail.com',
+              pass: 'yourpassword'
        }
     });
 
@@ -1246,8 +1246,8 @@ router.get('/shareG',function(req, res){
       }*/
       service: 'gmail',
        auth: {
-              user: 'dummyemail14061994@gmail.com',
-              pass: '1234qwerasdfzxcv'
+              user: 'youremail@address.com@gmail.com',
+              pass: 'yourpassword'
        }
     });
 
